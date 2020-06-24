@@ -1,0 +1,22 @@
+on: push
+jobs:
+  test-job:
+    name: I test shell scripts
+    runs-on: ubuntu-latest
+    container:
+      image: node:14.4.0-buster-slim
+    steps:
+      - uses: actions/checkout@master
+      - name: Lint Bash Scripts
+        uses: ludeeus/action-shellcheck@master
+      - name: Install Bats
+        run: npm install -g bats # assumes npm is available
+      - name: Use backup install plan
+        run: >
+          cd /tmp &&
+          git clone https://github.com/bats-core/bats-core.git --depth 1 &&
+          cd bats-core &&
+          ./install.sh /usr/local
+        if: ${{ failure() }}
+      - name: Run tests
+        run: bats --tap t
